@@ -1,6 +1,9 @@
 package com.musala.drones.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 @Entity
 public class Drone {
@@ -9,9 +12,14 @@ public class Drone {
     @Column(name = "id", nullable = false)
     private Long id;
 
+    @Column(name = "serial_number", nullable = false, length = 100, unique = true)
+    private String serialNumber;
+
     @Column(name = "weight_limit", nullable = false)
     private int weightLimit;
 
+    @Min(0)
+    @Max(100)
     @Column(name = "battery_capacity", nullable = false)
     private int batteryCapacity;
 
@@ -25,6 +33,14 @@ public class Drone {
 
     public StateDrone getStateDrone() {
         return stateDrone;
+    }
+
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
     }
 
     public void setStateDrone(StateDrone stateDrone) {

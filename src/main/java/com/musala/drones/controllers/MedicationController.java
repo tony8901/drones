@@ -32,6 +32,7 @@ public class MedicationController {
                                   @RequestParam("weight") int weight){
         return medicationService.create(image, name, code, weight);
     }
+
     @PostMapping("/id/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id){ return medicationService.findById(id);}
 
