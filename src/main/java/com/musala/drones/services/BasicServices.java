@@ -34,8 +34,7 @@ public class BasicServices<T , ID> {
     public ResponseEntity<?> findAll() {
         try {
             Optional<Object> optional = Optional.of(jpaRepository.findAll());
-            return optional.map(
-                            o -> new ResponseEntity<>(o, HttpStatus.OK))
+            return optional.map(o -> new ResponseEntity<>(o, HttpStatus.OK))
                     .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(NAME_ENTITY+" not found!"));
         } catch (Exception e){
             throw new ErrorResponseException(
@@ -48,11 +47,11 @@ public class BasicServices<T , ID> {
 
     public ResponseEntity<?> findById(ID id) {
         try {
-            if(jpaRepository.existsById(id)){
-                return ResponseEntity.status(HttpStatus.OK).body(jpaRepository.findById(id));
-            }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(NAME_ENTITY+" not found with id: " + id);
-        } catch (Exception e) {
+            return jpaRepository.existsById(id)
+                    ? ResponseEntity.status(HttpStatus.OK).body(jpaRepository.findById(id))
+                    : ResponseEntity.status(HttpStatus.NOT_FOUND).body(NAME_ENTITY+" not found with id: " + id);
+
+       } catch (Exception e) {
             throw new ErrorResponseException(
                     HttpStatus.BAD_REQUEST,
                     ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage()),

@@ -7,9 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface MedicationRepository extends JpaRepository<Medication, Long> {
+public interface MedicationRepository extends BasicRepositoryWithNamedEntity<Medication, Long> {
 
-    List<Medication> findByName(String name);
-
-    boolean existsByName(String name);
 }

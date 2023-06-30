@@ -3,15 +3,16 @@ package com.musala.drones.entities;
 import jakarta.persistence.*;
 
 @Entity
-public class StateDrone {
+public class StateDrone implements NamedEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
+    @Override
     public String getName() {
         return name;
     }

@@ -1,26 +1,34 @@
 package com.musala.drones.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 
 @Entity
-public class Medication {
+public class Medication implements NamedEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
     @Column(name = "name", nullable = false)
+    @Pattern(regexp = "^[a-zA-Z0-9_-]*$")
     private String name;
 
     @Column(name = "weight", nullable = false)
     private int weight;
 
     @Column(name = "code", nullable = false, unique = true)
+    @Pattern(regexp = "^[A-Z0-9_]*$")
     private String code;
 
     @Column(name = "image")
-    private String image;
+    @Lob
+    @Size(max = 524288) // 512 KB
+    private byte[] image;
 
+    @Override
     public String getName() {
         return name;
     }
@@ -45,11 +53,11 @@ public class Medication {
         this.code = code;
     }
 
-    public String getImage() {
+    public byte[] getImage() {
         return image;
     }
 
-    public void setImage(String image) {
+    public void setImage(byte[] image) {
         this.image = image;
     }
 
