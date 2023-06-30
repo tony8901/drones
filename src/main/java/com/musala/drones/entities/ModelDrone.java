@@ -6,15 +6,16 @@ import org.hibernate.proxy.HibernateProxy;
 import java.util.Objects;
 
 @Entity
-public class ModelDrone {
+public class ModelDrone implements NamedEntity{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
+    @Override
     public String getName() {
         return name;
     }

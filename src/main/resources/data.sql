@@ -1,0 +1,13 @@
+insert into model_drone (name) values ('Lightweight');
+insert into model_drone (name) values ('Middleweight');
+insert into model_drone (name) values ('Cruiserweight');
+insert into model_drone (name) values ('Heavyweight');
+insert into state_drone (name) values ('IDLE');
+insert into state_drone (name) values ('LOADING');
+insert into state_drone (name) values ('LOADED');
+insert into state_drone (name) values ('DELIVERING');
+insert into state_drone (name) values ('DELIVERED');
+insert into state_drone (name) values ('RETURNING');
+insert into medication (name, weight, code) values ('Name1', 200, 'CODE1');
+insert into medication (name, weight, code) values ('Name2', 200, 'CODE2');
+insert into medication (name, weight, code) values ('Name3', 200, 'CODE3');
