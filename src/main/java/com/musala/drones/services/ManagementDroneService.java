@@ -1,5 +1,6 @@
 package com.musala.drones.services;
 
+import com.musala.drones.dto.DroneCapacityDTO;
 import com.musala.drones.entities.Drone;
 import com.musala.drones.entities.Medication;
 import com.musala.drones.repositories.DroneRepository;
@@ -12,6 +13,7 @@ import org.springframework.web.ErrorResponseException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ManagementDroneService {
@@ -61,6 +63,36 @@ public class ManagementDroneService {
             Drone drone = droneRepository.findById(id).get();
             List<Medication> medicationList = new ArrayList<>(drone.getMedications());
             return ResponseEntity.status(HttpStatus.OK).body(medicationList);
+
+        } catch (Exception e) {
+            throw new ErrorResponseException(
+                    HttpStatus.BAD_REQUEST,
+                    ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage()),
+                    null
+            );
+        }
+    }
+
+    public ResponseEntity<?> availableDrones(){
+        try{
+            List<Drone> droneList = droneRepository.findAll();
+            List<DroneCapacityDTO> availableDrones = new ArrayList<>();
+
+            if (droneList.isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Drones not found!");
+            }
+
+            for (Drone drone: droneList){
+                int capacityCharged = checkCapacity(drone);
+                int weightLimit = drone.getWeightLimit();
+
+                if(capacityCharged < weightLimit){
+                    int availableCapacity = weightLimit-capacityCharged;
+                    availableDrones.add(new DroneCapacityDTO(drone, availableCapacity));
+                }
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(availableDrones);
 
         } catch (Exception e) {
             throw new ErrorResponseException(

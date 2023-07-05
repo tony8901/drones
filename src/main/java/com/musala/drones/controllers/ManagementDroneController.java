@@ -25,4 +25,9 @@ public class ManagementDroneController {
     public ResponseEntity<?> checkDroneCharge(@PathVariable Long id){
         return managementDroneService.checkDroneCharge(id);
     }
+
+    @GetMapping("/available")
+    public ResponseEntity<?> availableDrones(){
+        return managementDroneService.availableDrones();
+    }
 }
