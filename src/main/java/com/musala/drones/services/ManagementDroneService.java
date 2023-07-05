@@ -3,8 +3,10 @@ package com.musala.drones.services;
 import com.musala.drones.dto.DroneCapacityDTO;
 import com.musala.drones.entities.Drone;
 import com.musala.drones.entities.Medication;
+import com.musala.drones.entities.StateDrone;
 import com.musala.drones.repositories.DroneRepository;
 import com.musala.drones.repositories.MedicationRepository;
+import com.musala.drones.repositories.StateDroneRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -12,8 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponseException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ManagementDroneService {
@@ -24,15 +26,33 @@ public class ManagementDroneService {
 
     private final MedicationRepository medicationRepository;
 
+    private final StateDroneRepository stateDroneRepository;
 
-    public ManagementDroneService(DroneRepository droneRepository, MedicationRepository medicationRepository) {
+
+    public ManagementDroneService(DroneRepository droneRepository, MedicationRepository medicationRepository, StateDroneRepository stateDroneRepository) {
         this.droneRepository = droneRepository;
         this.medicationRepository = medicationRepository;
+        this.stateDroneRepository = stateDroneRepository;
     }
 
     public ResponseEntity<?> loadingDronMedications(Long droneId, List<Long> medicationListId) {
         try {
             Drone drone = droneRepository.findById(droneId).get();
+            StateDrone state = drone.getStateDrone();
+
+            if(!state.getName().equals("IDLE")){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The drone is already "+state.getName()+"!");
+            } else if (drone.getBatteryCapacity() < 25) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Drone battery is below 25%!");
+            }
+            List<StateDrone> stateDrone = stateDroneRepository.findByNameIgnoreCase("LOADING");
+            if (!stateDrone.isEmpty()){
+                StateDrone stateDrone1 = stateDrone.get(0);
+                drone.setStateDrone(stateDrone1);
+            } else{
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error loading drone states!");
+            }
+
             List<Medication> medicationList = drone.getMedications();
             int capacityCharged = checkCapacity(drone);
 
@@ -48,7 +68,9 @@ public class ManagementDroneService {
             }
 
             drone.setMedications(medicationList);
-            return ResponseEntity.status(HttpStatus.OK).body(droneRepository.save(drone));
+            drone.setStateDrone(state);
+            droneRepository.save(drone);
+            return ResponseEntity.status(HttpStatus.OK).body(drone);
         } catch (Exception e) {
             throw new ErrorResponseException(
                     HttpStatus.BAD_REQUEST,
@@ -73,26 +95,46 @@ public class ManagementDroneService {
         }
     }
 
-    public ResponseEntity<?> availableDrones(){
-        try{
+    public ResponseEntity<?> availableDrones() {
+        try {
             List<Drone> droneList = droneRepository.findAll();
             List<DroneCapacityDTO> availableDrones = new ArrayList<>();
 
-            if (droneList.isEmpty()){
+            if (droneList.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Drones not found!");
             }
 
-            for (Drone drone: droneList){
+            for (Drone drone : droneList) {
                 int capacityCharged = checkCapacity(drone);
                 int weightLimit = drone.getWeightLimit();
 
-                if(capacityCharged < weightLimit){
-                    int availableCapacity = weightLimit-capacityCharged;
+                if (capacityCharged < weightLimit) {
+                    int availableCapacity = weightLimit - capacityCharged;
                     availableDrones.add(new DroneCapacityDTO(drone, availableCapacity));
                 }
             }
 
             return ResponseEntity.status(HttpStatus.OK).body(availableDrones);
+
+        } catch (Exception e) {
+            throw new ErrorResponseException(
+                    HttpStatus.BAD_REQUEST,
+                    ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage()),
+                    null
+            );
+        }
+    }
+
+    public ResponseEntity<?> checkBattery(Long id) {
+        try {
+            if (droneRepository.findById(id).isPresent()) {
+                Drone drone = droneRepository.findById(id).get();
+                HashMap<String, Integer> checkBattery = new HashMap<>();
+                checkBattery.put("batteryCapacity", drone.getBatteryCapacity());
+                return ResponseEntity.status(HttpStatus.OK).body(checkBattery);
+            }
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Drone not found with id: " + id);
 
         } catch (Exception e) {
             throw new ErrorResponseException(

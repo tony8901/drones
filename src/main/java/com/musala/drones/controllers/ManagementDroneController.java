@@ -30,4 +30,9 @@ public class ManagementDroneController {
     public ResponseEntity<?> availableDrones(){
         return managementDroneService.availableDrones();
     }
+
+    @GetMapping("/{id}/battery")
+    public ResponseEntity<?> checkBattery(@PathVariable Long id){
+        return managementDroneService.checkBattery(id);
+    }
 }
