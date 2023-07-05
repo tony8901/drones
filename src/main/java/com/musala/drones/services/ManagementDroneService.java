@@ -165,7 +165,6 @@ public class ManagementDroneService {
                 auditEvent.setDescription("Battery of drone "+drone.getId()+" is "+drone.getBatteryCapacity()+"%.\n");
                 auditEvent.setTimestamp(LocalDateTime.now());
                 auditEventRepository.save(auditEvent);
-                System.out.println(auditEvent);
             }
         } catch (Exception e) {
             throw new ErrorResponseException(
