@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/admin/drones")
+//TODO: utilizar DTOs para transferir datos entre las capas de controlador y servicio en todas las entidades
+//TODO: restringir que los drones se creen sin medicamentos cargados
+//TODO: abstraer la relacion con la clase Medication para que se pueda cargar cualquier objeto
 public class DroneController {
 
     private final DroneService droneService;

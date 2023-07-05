@@ -1,9 +1,11 @@
 package com.musala.drones.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Drone {
@@ -30,6 +32,20 @@ public class Drone {
     @ManyToOne
     @JoinColumn(name = "state_drone_id")
     private StateDrone stateDrone;
+
+    @ManyToMany
+    @JoinTable(name = "drone_medications",
+            joinColumns = @JoinColumn(name = "drone_id"),
+            inverseJoinColumns = @JoinColumn(name = "medications_id"))
+    private List<Medication> medications = new ArrayList<>();
+
+    public List<Medication> getMedications() {
+        return medications;
+    }
+
+    public void setMedications(List<Medication> medications) {
+        this.medications = medications;
+    }
 
     public StateDrone getStateDrone() {
         return stateDrone;

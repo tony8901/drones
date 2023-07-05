@@ -28,6 +28,7 @@ public class Medication implements NamedEntity{
     @Size(max = 524288) // 512 KB
     private byte[] image;
 
+
     @Override
     public String getName() {
         return name;

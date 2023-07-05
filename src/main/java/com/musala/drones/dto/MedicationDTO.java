@@ -41,7 +41,7 @@ public class MedicationDTO {
         this.image = image;
     }
 
-    public Medication getMedication(){
+    public Medication toEntity(){
         Medication medication = new Medication();
 
         medication.setName(name);
