@@ -1,18 +1,22 @@
 package com.musala.drones.services;
 
 import com.musala.drones.dto.DroneCapacityDTO;
+import com.musala.drones.entities.AuditEvent;
 import com.musala.drones.entities.Drone;
 import com.musala.drones.entities.Medication;
 import com.musala.drones.entities.StateDrone;
+import com.musala.drones.repositories.AuditEventRepository;
 import com.musala.drones.repositories.DroneRepository;
 import com.musala.drones.repositories.MedicationRepository;
 import com.musala.drones.repositories.StateDroneRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponseException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,11 +32,17 @@ public class ManagementDroneService {
 
     private final StateDroneRepository stateDroneRepository;
 
+    private final AuditEventRepository auditEventRepository;
 
-    public ManagementDroneService(DroneRepository droneRepository, MedicationRepository medicationRepository, StateDroneRepository stateDroneRepository) {
+
+    public ManagementDroneService(DroneRepository droneRepository,
+                                  MedicationRepository medicationRepository,
+                                  StateDroneRepository stateDroneRepository,
+                                  AuditEventRepository auditEventRepository) {
         this.droneRepository = droneRepository;
         this.medicationRepository = medicationRepository;
         this.stateDroneRepository = stateDroneRepository;
+        this.auditEventRepository = auditEventRepository;
     }
 
     public ResponseEntity<?> loadingDronMedications(Long droneId, List<Long> medicationListId) {
@@ -136,6 +146,27 @@ public class ManagementDroneService {
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Drone not found with id: " + id);
 
+        } catch (Exception e) {
+            throw new ErrorResponseException(
+                    HttpStatus.BAD_REQUEST,
+                    ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage()),
+                    null
+            );
+        }
+    }
+
+    @Scheduled(fixedRate = 300000)
+    public void checkDronesBatteryLevels(){
+        try{
+            List<Drone> droneList = droneRepository.findAll();
+            for (Drone drone: droneList){
+                AuditEvent auditEvent = new AuditEvent();
+                auditEvent.setEventType("checking_battery_capacity");
+                auditEvent.setDescription("Battery of drone "+drone.getId()+" is "+drone.getBatteryCapacity()+"%.\n");
+                auditEvent.setTimestamp(LocalDateTime.now());
+                auditEventRepository.save(auditEvent);
+                System.out.println(auditEvent);
+            }
         } catch (Exception e) {
             throw new ErrorResponseException(
                     HttpStatus.BAD_REQUEST,

@@ -20,9 +20,8 @@ public class StateDroneService extends BasicServiceWithNamedEntity<StateDrone, L
 
     public StateDrone findStateDroneById(Long id){
         try{
-            Optional optional = stateDroneRepository.findById(id);
-            StateDrone stateDrone = (StateDrone) optional.get();
-            return stateDrone;
+            Optional<StateDrone> optional = stateDroneRepository.findById(id);
+            return optional.get();
         }catch (Exception e){
             throw new ErrorResponseException(
                     HttpStatus.BAD_REQUEST,
