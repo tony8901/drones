@@ -20,4 +20,9 @@ public class ManagementDroneController {
     public ResponseEntity<?> loadingDronMedications(@PathVariable Long drone, @RequestParam List<Long> id){
         return managementDroneService.loadingDronMedications(drone, id);
     }
+
+    @PostMapping("/{id}/loaded")
+    public ResponseEntity<?> checkDroneCharge(@PathVariable Long id){
+        return managementDroneService.checkDroneCharge(id);
+    }
 }

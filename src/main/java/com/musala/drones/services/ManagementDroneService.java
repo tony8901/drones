@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponseException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,12 +22,10 @@ public class ManagementDroneService {
 
     private final MedicationRepository medicationRepository;
 
-    private final DroneService droneService;
 
-    public ManagementDroneService(DroneRepository droneRepository, MedicationRepository medicationRepository, DroneService droneService) {
+    public ManagementDroneService(DroneRepository droneRepository, MedicationRepository medicationRepository) {
         this.droneRepository = droneRepository;
         this.medicationRepository = medicationRepository;
-        this.droneService = droneService;
     }
 
     public ResponseEntity<?> loadingDronMedications(Long droneId, List<Long> medicationListId) {
@@ -35,22 +34,34 @@ public class ManagementDroneService {
             List<Medication> medicationList = drone.getMedications();
             int capacityCharged = checkCapacity(drone);
 
-
-            if (!medicationListId.isEmpty()) {
-                for (Long medicationId : medicationListId) {
-                    Medication medication = medicationRepository.findById(medicationId).get();
-                    int medicationWeight = medication.getWeight();
-                    if (capacityCharged + medicationWeight <= MAX_CAPACITY) {
-                        medicationList.add(medication);
-                        capacityCharged+= medication.getWeight();
-                    } else {
-                        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The drone does not support more weight!");
-                    }
+            for (Long medicationId : medicationListId) {
+                Medication medication = medicationRepository.findById(medicationId).get();
+                int medicationWeight = medication.getWeight();
+                if (capacityCharged + medicationWeight <= MAX_CAPACITY) {
+                    medicationList.add(medication);
+                    capacityCharged += medication.getWeight();
+                } else {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The drone does not support more weight!");
                 }
-                drone.setMedications(medicationList);
-                return ResponseEntity.status(HttpStatus.OK).body(droneRepository.save(drone));
             }
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No charges were provided!");
+
+            drone.setMedications(medicationList);
+            return ResponseEntity.status(HttpStatus.OK).body(droneRepository.save(drone));
+        } catch (Exception e) {
+            throw new ErrorResponseException(
+                    HttpStatus.BAD_REQUEST,
+                    ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage()),
+                    null
+            );
+        }
+    }
+
+    public ResponseEntity<?> checkDroneCharge(Long id) {
+        try {
+            Drone drone = droneRepository.findById(id).get();
+            List<Medication> medicationList = new ArrayList<>(drone.getMedications());
+            return ResponseEntity.status(HttpStatus.OK).body(medicationList);
+
         } catch (Exception e) {
             throw new ErrorResponseException(
                     HttpStatus.BAD_REQUEST,
