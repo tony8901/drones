@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponseException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 @Service
 public class MedicationService extends BasicServiceWithNamedEntity<Medication, Long>{
 
@@ -38,8 +40,22 @@ public class MedicationService extends BasicServiceWithNamedEntity<Medication, L
             medicationDTO.setCode(code);
             medicationDTO.setWeight(weight);
 
-            return ResponseEntity.status(HttpStatus.OK).body(medicationRepository.save(medicationDTO.getMedication()));
+            return ResponseEntity.status(HttpStatus.OK).body(medicationRepository.save(medicationDTO.toEntity()));
         } catch (Exception e){
+            throw new ErrorResponseException(
+                    HttpStatus.BAD_REQUEST,
+                    ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage()),
+                    null
+            );
+        }
+    }
+
+    public Medication findMedicationById(Long id){
+        try{
+            Optional optional = medicationRepository.findById(id);
+            Medication medication = (Medication) optional.get();
+            return medication;
+        }catch (Exception e){
             throw new ErrorResponseException(
                     HttpStatus.BAD_REQUEST,
                     ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage()),
