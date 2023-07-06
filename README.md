@@ -39,7 +39,7 @@ The application will start and be available at `http://localhost:8080`.
 > The test data for Postman is in the drones/src/main/resources/postman/Musala Drones.postman_collection.json file.
 
 ## Swagger
-To view the swagger API specifications go to: [http://localhost:8080/swagger-ui/index.html/](http://localhost:8080/swagger-ui/index.html/)
+To view the swagger API specifications go to: [http://localhost:8080/swagger-ui/index.html/](http://localhost:8080/swagger-ui/index.html)
 
 ## Features
 ### StateDrone
